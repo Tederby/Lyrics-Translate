@@ -5,21 +5,26 @@ import type {
   Song,
   SongFrontmatter,
   SongLanguageContent,
-  LanguageKey,
   ArtistInfo,
 } from "./types";
 
 const LYRICS_DIR = path.join(process.cwd(), "lyrics");
-const LANGUAGE_FILES: LanguageKey[] = [
-  "indonesia",
-  "english",
-  "romaji",
-  "original",
-];
+
+/**
+ * Priority order for determining the primary metadata source.
+ * The first file found in this order becomes the metadata source.
+ * Any .md file not in this list is discovered dynamically and appended after.
+ */
+const METADATA_PRIORITY = ["original", "romaji", "indonesia", "english"];
+
+/**
+ * Files/directories to ignore when scanning for language .md files.
+ */
+const IGNORED_FILES = new Set(["README.md", "readme.md"]);
 
 /**
  * Recursively find all "song folders" under lyrics/.
- * A song folder is any directory containing at least `indonesia.md`.
+ * A song folder is any directory containing at least one .md file.
  * Returns the relative path segments from lyrics/ to each song folder.
  */
 function findSongFolders(dir: string, segments: string[] = []): string[][] {
@@ -29,11 +34,14 @@ function findSongFolders(dir: string, segments: string[] = []): string[][] {
 
   const entries = fs.readdirSync(dir, { withFileTypes: true });
 
-  // Check if this directory IS a song folder (has indonesia.md)
-  const hasIndonesia = entries.some(
-    (e) => e.isFile() && e.name === "indonesia.md"
+  // Check if this directory IS a song folder (has at least one .md file)
+  const hasMd = entries.some(
+    (e) =>
+      e.isFile() &&
+      e.name.endsWith(".md") &&
+      !IGNORED_FILES.has(e.name)
   );
-  if (hasIndonesia) {
+  if (hasMd) {
     results.push([...segments]);
   }
 
@@ -53,6 +61,40 @@ function findSongFolders(dir: string, segments: string[] = []): string[][] {
 }
 
 /**
+ * Discover all language .md files in a song folder.
+ * Returns an array of language keys (filenames without .md extension).
+ */
+function discoverLanguages(songFolderPath: string): string[] {
+  if (!fs.existsSync(songFolderPath)) return [];
+
+  const entries = fs.readdirSync(songFolderPath, { withFileTypes: true });
+
+  return entries
+    .filter(
+      (e) =>
+        e.isFile() &&
+        e.name.endsWith(".md") &&
+        !IGNORED_FILES.has(e.name)
+    )
+    .map((e) => e.name.replace(/\.md$/, ""));
+}
+
+/**
+ * Sort language keys with known languages first (in priority order),
+ * then unknown languages alphabetically.
+ */
+function sortLanguageKeys(keys: string[]): string[] {
+  const knownOrder = ["original", "romaji", "indonesia", "english"];
+
+  const known = knownOrder.filter((k) => keys.includes(k));
+  const unknown = keys
+    .filter((k) => !knownOrder.includes(k))
+    .sort();
+
+  return [...known, ...unknown];
+}
+
+/**
  * Parse a single .md file and return its frontmatter + content.
  */
 function parseMarkdownFile(filePath: string): SongLanguageContent | null {
@@ -63,19 +105,67 @@ function parseMarkdownFile(filePath: string): SongLanguageContent | null {
 
   return {
     frontmatter: {
+      // Required
       title: data.title ?? "",
-      title_original: data.title_original,
       artist: data.artist ?? "",
+      tags: Array.isArray(data.tags) ? data.tags : [],
+
+      // Optional (existing)
+      title_original: data.title_original,
       album: data.album,
       vocalist: data.vocalist,
       producer: data.producer,
       release_date: data.release_date,
       translator_note: data.translator_note,
-      tags: Array.isArray(data.tags) ? data.tags : [],
       source_url: data.source_url,
       translated_date: data.translated_date,
+
+      // Optional (new)
+      title_romaji: data.title_romaji,
+      lyricist: data.lyricist,
+      arranger: data.arranger,
+      illustrator: data.illustrator,
+      original_language: data.original_language,
     },
     content: content.trim(),
+  };
+}
+
+/**
+ * Determine the primary metadata source from available languages.
+ * Priority: original → romaji → indonesia → english → first available.
+ *
+ * Returns the frontmatter from the highest-priority file that has metadata.
+ * Falls back gracefully even if critical fields like title/artist are missing.
+ */
+function resolvePrimaryMetadata(
+  languages: Record<string, SongLanguageContent>,
+  slugSegments: string[]
+): SongFrontmatter {
+  const orderedKeys = [
+    ...METADATA_PRIORITY.filter((k) => k in languages),
+    ...Object.keys(languages).filter((k) => !METADATA_PRIORITY.includes(k)),
+  ];
+
+  // Find the first file that has non-empty metadata
+  for (const key of orderedKeys) {
+    const fm = languages[key]?.frontmatter;
+    if (fm && (fm.title || fm.artist || fm.tags.length > 0)) {
+      return fm;
+    }
+  }
+
+  // Extreme fallback: no file has meaningful metadata
+  // Use the first available file's frontmatter, with slug-based fallbacks
+  const firstKey = orderedKeys[0];
+  const baseFm = firstKey
+    ? languages[firstKey].frontmatter
+    : { title: "", artist: "", tags: [] };
+
+  return {
+    ...baseFm,
+    title: baseFm.title || slugSegments[slugSegments.length - 1]?.replace(/_/g, " ") || "Untitled",
+    artist: baseFm.artist || slugSegments[0]?.replace(/_/g, " ") || "Unknown Artist",
   };
 }
 
@@ -84,10 +174,11 @@ function parseMarkdownFile(filePath: string): SongLanguageContent | null {
  */
 function loadSongLanguages(
   songFolderPath: string
-): Partial<Record<LanguageKey, SongLanguageContent>> {
-  const languages: Partial<Record<LanguageKey, SongLanguageContent>> = {};
+): Record<string, SongLanguageContent> {
+  const languages: Record<string, SongLanguageContent> = {};
+  const langKeys = discoverLanguages(songFolderPath);
 
-  for (const lang of LANGUAGE_FILES) {
+  for (const lang of langKeys) {
     const filePath = path.join(songFolderPath, `${lang}.md`);
     const parsed = parseMarkdownFile(filePath);
     if (parsed) {
@@ -96,6 +187,36 @@ function loadSongLanguages(
   }
 
   return languages;
+}
+
+/**
+ * Build a precomputed searchable text string from all metadata + lyrics content.
+ * Used for fast client-side fuzzy search.
+ */
+function buildSearchableText(
+  metadata: SongFrontmatter,
+  languages: Record<string, SongLanguageContent>
+): string {
+  const parts: string[] = [
+    metadata.title,
+    metadata.title_original ?? "",
+    metadata.title_romaji ?? "",
+    metadata.artist,
+    metadata.vocalist ?? "",
+    metadata.producer ?? "",
+    metadata.lyricist ?? "",
+    metadata.arranger ?? "",
+    metadata.illustrator ?? "",
+    metadata.album ?? "",
+    ...metadata.tags,
+  ];
+
+  // Include lyrics content from all languages
+  for (const lang of Object.values(languages)) {
+    parts.push(lang.content);
+  }
+
+  return parts.join(" ").toLowerCase();
 }
 
 /**
@@ -110,15 +231,21 @@ export function getAllSongs(): Song[] {
       const songFolderPath = path.join(LYRICS_DIR, ...segments);
       const languages = loadSongLanguages(songFolderPath);
 
-      // indonesia.md is the primary source of truth
-      const primary = languages.indonesia;
-      if (!primary) return null;
+      // Must have at least one language file
+      const langKeys = Object.keys(languages);
+      if (langKeys.length === 0) return null;
+
+      const metadata = resolvePrimaryMetadata(languages, segments);
+      const availableLanguages = sortLanguageKeys(langKeys);
+      const searchableText = buildSearchableText(metadata, languages);
 
       return {
         slug: segments,
         artistSlug: segments[0],
-        metadata: primary.frontmatter,
+        metadata,
         languages,
+        availableLanguages,
+        searchableText,
       };
     })
     .filter((s): s is Song => s !== null);
@@ -140,23 +267,24 @@ export function getAllSongs(): Song[] {
 export function getSongBySlug(slugSegments: string[]): Song | null {
   const songFolderPath = path.join(LYRICS_DIR, ...slugSegments);
 
-  // Verify this is a song folder
-  if (
-    !fs.existsSync(songFolderPath) ||
-    !fs.existsSync(path.join(songFolderPath, "indonesia.md"))
-  ) {
-    return null;
-  }
+  // Verify this is a valid song folder (has at least one .md)
+  if (!fs.existsSync(songFolderPath)) return null;
 
   const languages = loadSongLanguages(songFolderPath);
-  const primary = languages.indonesia;
-  if (!primary) return null;
+  const langKeys = Object.keys(languages);
+  if (langKeys.length === 0) return null;
+
+  const metadata = resolvePrimaryMetadata(languages, slugSegments);
+  const availableLanguages = sortLanguageKeys(langKeys);
+  const searchableText = buildSearchableText(metadata, languages);
 
   return {
     slug: slugSegments,
     artistSlug: slugSegments[0],
-    metadata: primary.frontmatter,
+    metadata,
     languages,
+    availableLanguages,
+    searchableText,
   };
 }
 

@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Lyrics Translation",
   description:
-    "Personal translations of Vocaloid and J-Pop song lyrics from Japanese to Indonesian",
+    "Personal translations of Vocaloid and J-Pop song lyrics.",
 };
 
 export default function RootLayout({

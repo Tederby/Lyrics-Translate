@@ -55,7 +55,7 @@ export async function generateMetadata({
 
   return {
     title: `${song.metadata.title} — ${song.metadata.artist} — Lyrics Translation`,
-    description: `Indonesian translation of ${song.metadata.title} (${song.metadata.title_original ?? ""}) by ${song.metadata.artist}`,
+    description: `Lyrics and translations of ${song.metadata.title} (${song.metadata.title_original ?? ""}) by ${song.metadata.artist}`,
   };
 }
 
