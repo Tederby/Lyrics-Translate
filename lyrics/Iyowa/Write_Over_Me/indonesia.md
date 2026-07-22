@@ -7,7 +7,7 @@ producer: "Iyowa"
 release_date: "2024-08-24"
 translator_note: ""
 tags: ["vocaloid", "iyowa", "hatsune-miku", "hanakuma-chifuyu", "花隈千冬", "初音ミク"]
-source_url: "https://www.youtube.com/watch?v=u0gY8D6W-7w"
+source_url: "https://www.youtube.com/watch?v=T3Son6CzPUk"
 translated_date: "2026-07-20"
 ---
 
