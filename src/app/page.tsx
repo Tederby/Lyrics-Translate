@@ -3,7 +3,7 @@ import SongList from "./components/SongList";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Lyrics Translation — Japanese to Indonesian Song Translations",
+  title: "Personal Lyrics Translation",
   description:
     "Personal translations of Vocaloid and J-Pop song lyrics from Japanese to Indonesian, English, and Romaji.",
 };
