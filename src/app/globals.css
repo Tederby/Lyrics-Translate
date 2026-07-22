@@ -25,3 +25,21 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Furigana / Ruby text styling */
+ruby {
+  ruby-align: center;
+}
+
+ruby rt {
+  font-size: 0.55em;
+  font-weight: normal;
+  color: var(--foreground);
+  opacity: 0.6;
+}
+
+/* Ensure lines with ruby annotations have enough spacing */
+.prose ruby {
+  line-height: 2;
+}
+

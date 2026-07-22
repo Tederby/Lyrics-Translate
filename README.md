@@ -12,6 +12,7 @@ Dibangun dengan Next.js (App Router), konten disimpan sebagai file Markdown di r
 - **Fuzzy search** — Cari berdasarkan judul, artis, vocalist, producer, tag, bahkan isi lirik — tidak harus exact match
 - **YouTube embed** — Video YouTube otomatis di-embed langsung di halaman lagu
 - **Markdown rendering** — Lirik dirender sebagai markdown terformat (bold, italic, dll.)
+- **Furigana support** — Syntax `{漢字|ふりがな}` untuk menampilkan reading di atas kanji
 - **Tags** — Filter lagu berdasarkan tag (vocaloid, j-pop, ballad, dll.)
 - **Copy lyrics** — Copy lirik ke clipboard dengan satu klik
 - **Keyboard shortcuts** — `1–9` untuk ganti bahasa, `S` untuk toggle side-by-side
@@ -91,7 +92,21 @@ Isi lirik di sini, **mendukung markdown formatting**.
 
 Baris baru dipertahankan.
 *Italic* dan **bold** dirender.
+
+Furigana: {事切|ことき}れて、またね。
 ```
+
+### Furigana (Ruby Text)
+
+Gunakan syntax `{漢字|ふりがな}` untuk menambahkan furigana di atas kanji:
+
+```markdown
+{事切|ことき}れて、またね。
+{宛|あて}もなくただ{辿|たど}る{家路|いえじ}を、
+{他人事|ひとごと}のように{日々|ひび}を{眺|なが}めた。
+```
+
+Akan dirender sebagai teks dengan annotation kecil di atas kanji. Browser yang tidak support ruby text akan menampilkan reading dalam tanda kurung sebagai fallback.
 
 ### Tabel Metadata
 

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import TagChip from "@/app/components/TagChip";
 import VideoEmbed from "@/app/components/VideoEmbed";
 import type { Song } from "@/lib/types";
@@ -228,6 +229,19 @@ export default function SongDetail({ song }: SongDetailProps) {
   );
 }
 
+/**
+ * Preprocess markdown content to convert {漢字|かんじ} syntax into HTML <ruby> tags.
+ * This enables furigana annotations in lyrics.
+ * Example: {事切|ことき}れて → <ruby>事切<rp>(</rp><rt>ことき</rt><rp>)</rp></ruby>れて
+ */
+function preprocessFurigana(content: string): string {
+  return content.replace(
+    /\{([^|{}]+)\|([^|{}]+)\}/g,
+    (_match, base: string, reading: string) =>
+      `<ruby>${base}<rp>(</rp><rt>${reading}</rt><rp>)</rp></ruby>`
+  );
+}
+
 function LyricsPane({
   label,
   content,
@@ -281,9 +295,12 @@ function LyricsPane({
           )}
         </button>
       </div>
-      <div className="prose prose-zinc max-w-none leading-relaxed dark:prose-invert prose-p:my-1 prose-p:leading-relaxed">
-        <ReactMarkdown remarkPlugins={[remarkBreaks, remarkGfm]}>
-          {content}
+      <div className="prose prose-zinc max-w-none leading-relaxed dark:prose-invert prose-p:my-4 prose-p:leading-relaxed">
+        <ReactMarkdown
+          remarkPlugins={[remarkBreaks, remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
+        >
+          {preprocessFurigana(content)}
         </ReactMarkdown>
       </div>
     </div>
