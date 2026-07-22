@@ -4,7 +4,7 @@ artist: "shikisai"
 tags: ["vocaloid", "hatsune miku", "kagamine rin"]
 title_original: "贅沢と君とカプチーノ"
 title_romaji: "Zeitaku to Kimi to Cappuccino"
-vocalist: "Hatsune Miku, Kagaine Rin"
+vocalist: "Hatsune Miku, Kagamine Rin"
 illustrator: "Kanashii Hito"
 release_date: "2024-07-21"
 source_url: "https://www.youtube.com/watch?v=LPci3mEA5AA"
