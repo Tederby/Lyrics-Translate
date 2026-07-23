@@ -17,7 +17,7 @@ Bila tak begini, kau takkan sudi menatapku.
 
 Hei,
 Cintailah aku sampai kau muak padaku.
-Lukakai, nodai, dan jadikan aku mainanmu.
+Lukai, nodai, dan jadikan aku mainanmu.
 Kumohon tuangkanlah... rasa sakit itu padaku.
 
 Hei, alasanku bertahan hidup mungkin, atau lebih tepatnya sudah pasti,
