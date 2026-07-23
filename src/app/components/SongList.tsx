@@ -119,17 +119,23 @@ function SongCard({ song, index }: { song: Song; index: number }) {
       <div className="flex min-w-0 flex-1 flex-col justify-between p-4">
         <div>
           {/* Title */}
-          <h2 className="font-semibold text-zinc-900 transition-colors group-hover:text-zinc-700 dark:text-zinc-100 dark:group-hover:text-white">
+          <h2 
+            className="line-clamp-2 font-semibold text-zinc-900 transition-colors group-hover:text-zinc-700 dark:text-zinc-100 dark:group-hover:text-white"
+            title={song.metadata.title}
+          >
             {song.metadata.title}
           </h2>
           {song.metadata.title_original && (
-            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+            <p 
+              className="mt-0.5 truncate text-sm text-zinc-500 dark:text-zinc-400"
+              title={song.metadata.title_original}
+            >
               {song.metadata.title_original}
             </p>
           )}
 
           {/* Artist / Vocalist */}
-          <p className="mt-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-1.5 truncate text-sm text-zinc-600 dark:text-zinc-400">
             {song.metadata.artist}
             {song.metadata.vocalist &&
               song.metadata.vocalist !== song.metadata.artist && (
