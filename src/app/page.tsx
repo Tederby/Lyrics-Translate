@@ -14,21 +14,37 @@ export default function HomePage() {
   const tags = getAllTags();
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="mb-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-        Lyrics Translation
-      </h1>
-      <p className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
-        Personal translations of Vocaloid &amp; J-Pop lyrics
-      </p>
+    <div className="mx-auto max-w-5xl px-4 py-10">
+      {/* Hero */}
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-4xl">
+          Lyrics Translation
+        </h1>
+        <p className="mt-2 text-base text-zinc-500 dark:text-zinc-400">
+          Personal translations of Vocaloid &amp; J-Pop lyrics
+        </p>
 
-      {/* Stats */}
-      <div className="mb-6 flex gap-4 text-xs text-zinc-400 dark:text-zinc-500">
-        <span>{songs.length} songs</span>
-        <span>·</span>
-        <span>{artists.length} artists</span>
-        <span>·</span>
-        <span>{tags.length} tags</span>
+        {/* Stats pills */}
+        <div className="mt-4 flex gap-3">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+            <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              {songs.length}
+            </span>
+            songs
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+            <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              {artists.length}
+            </span>
+            artists
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+            <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              {tags.length}
+            </span>
+            tags
+          </span>
+        </div>
       </div>
 
       <SongList songs={songs} />

@@ -1,50 +1,6 @@
 "use client";
 
-/**
- * Extracts a YouTube video ID from various URL formats.
- * Supports: youtube.com/watch?v=, youtu.be/, youtube.com/embed/, youtube.com/shorts/
- */
-function extractYouTubeId(url: string): string | null {
-  try {
-    const parsed = new URL(url);
-
-    // youtube.com/watch?v=VIDEO_ID
-    if (
-      (parsed.hostname === "www.youtube.com" ||
-        parsed.hostname === "youtube.com") &&
-      parsed.pathname === "/watch"
-    ) {
-      return parsed.searchParams.get("v");
-    }
-
-    // youtu.be/VIDEO_ID
-    if (parsed.hostname === "youtu.be") {
-      return parsed.pathname.slice(1) || null;
-    }
-
-    // youtube.com/embed/VIDEO_ID
-    if (
-      (parsed.hostname === "www.youtube.com" ||
-        parsed.hostname === "youtube.com") &&
-      parsed.pathname.startsWith("/embed/")
-    ) {
-      return parsed.pathname.split("/")[2] || null;
-    }
-
-    // youtube.com/shorts/VIDEO_ID
-    if (
-      (parsed.hostname === "www.youtube.com" ||
-        parsed.hostname === "youtube.com") &&
-      parsed.pathname.startsWith("/shorts/")
-    ) {
-      return parsed.pathname.split("/")[2] || null;
-    }
-  } catch {
-    return null;
-  }
-
-  return null;
-}
+import { extractYouTubeId } from "@/lib/youtube";
 
 interface VideoEmbedProps {
   url: string;

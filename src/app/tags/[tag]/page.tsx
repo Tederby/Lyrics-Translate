@@ -1,14 +1,14 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getAllTags, getSongsByTag } from "@/lib/lyrics";
+import { getAllTagsWithSlugs, getSongsByTagSlug } from "@/lib/lyrics";
 import SongList from "@/app/components/SongList";
 import type { Metadata } from "next";
 
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  const tags = getAllTags();
-  return tags.map((tag) => ({ tag }));
+  const tags = getAllTagsWithSlugs();
+  return tags.map(({ slug }) => ({ tag: slug }));
 }
 
 export async function generateMetadata({
@@ -16,11 +16,12 @@ export async function generateMetadata({
 }: {
   params: Promise<{ tag: string }>;
 }): Promise<Metadata> {
-  const { tag } = await params;
-  const decodedTag = decodeURIComponent(tag);
+  const { tag: slug } = await params;
+  const result = getSongsByTagSlug(decodeURIComponent(slug));
+  const displayTag = result?.tag ?? slug;
   return {
-    title: `"${decodedTag}" — Tags — Lyrics Translation`,
-    description: `Songs tagged with "${decodedTag}"`,
+    title: `"${displayTag}" — Tags — Lyrics Translation`,
+    description: `Songs tagged with "${displayTag}"`,
   };
 }
 
@@ -29,11 +30,10 @@ export default async function TagPage({
 }: {
   params: Promise<{ tag: string }>;
 }) {
-  const { tag } = await params;
-  const decodedTag = decodeURIComponent(tag);
-  const songs = getSongsByTag(decodedTag);
+  const { tag: slug } = await params;
+  const result = getSongsByTagSlug(decodeURIComponent(slug));
 
-  if (songs.length === 0) {
+  if (!result || result.songs.length === 0) {
     notFound();
   }
 
@@ -44,15 +44,15 @@ export default async function TagPage({
         <span className="mx-2">›</span>
         <Link href="/tags" className="hover:text-zinc-700 dark:hover:text-zinc-200">Tags</Link>
         <span className="mx-2">›</span>
-        <span className="text-zinc-900 dark:text-zinc-100">{decodedTag}</span>
+        <span className="text-zinc-900 dark:text-zinc-100">{result.tag}</span>
       </nav>
       <h1 className="mb-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-        Tag: {decodedTag}
+        Tag: {result.tag}
       </h1>
       <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
-        {songs.length} song{songs.length !== 1 ? "s" : ""}
+        {result.songs.length} song{result.songs.length !== 1 ? "s" : ""}
       </p>
-      <SongList songs={songs} showSearch={false} />
+      <SongList songs={result.songs} showSearch={false} />
     </div>
   );
 }

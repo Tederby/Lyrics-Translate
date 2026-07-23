@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getAllTags, getSongsByTag } from "@/lib/lyrics";
+import { getAllTagsWithSlugs, getSongsByTag } from "@/lib/lyrics";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default function TagsIndexPage() {
-  const tags = getAllTags();
+  const tags = getAllTagsWithSlugs();
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -16,12 +16,12 @@ export default function TagsIndexPage() {
         Tags
       </h1>
       <div className="flex flex-wrap gap-2">
-        {tags.map((tag) => {
+        {tags.map(({ tag, slug }) => {
           const count = getSongsByTag(tag).length;
           return (
             <Link
               key={tag}
-              href={`/tags/${encodeURIComponent(tag)}`}
+              href={`/tags/${encodeURIComponent(slug)}`}
               className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 px-3 py-1.5 text-sm text-zinc-700 transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:bg-zinc-800"
             >
               {tag}

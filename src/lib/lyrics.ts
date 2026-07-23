@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { tagToSlug } from "./tags";
 import type {
   Song,
   SongFrontmatter,
@@ -336,10 +337,13 @@ export function getSongsByArtist(artistSlug: string): Song[] {
   return getAllSongs().filter((song) => song.artistSlug === artistSlug);
 }
 
+// Re-export tagToSlug from the client-safe module
+export { tagToSlug } from "./tags";
+
 /**
- * Get all unique tags across all songs.
+ * Get all unique tags across all songs, with their slugs.
  */
-export function getAllTags(): string[] {
+export function getAllTagsWithSlugs(): { tag: string; slug: string }[] {
   const songs = getAllSongs();
   const tagSet = new Set<string>();
 
@@ -349,7 +353,16 @@ export function getAllTags(): string[] {
     }
   }
 
-  return Array.from(tagSet).sort();
+  return Array.from(tagSet)
+    .sort()
+    .map((tag) => ({ tag, slug: tagToSlug(tag) }));
+}
+
+/**
+ * Get all unique tags across all songs.
+ */
+export function getAllTags(): string[] {
+  return getAllTagsWithSlugs().map((t) => t.tag);
 }
 
 /**
@@ -357,4 +370,19 @@ export function getAllTags(): string[] {
  */
 export function getSongsByTag(tag: string): Song[] {
   return getAllSongs().filter((song) => song.metadata.tags.includes(tag));
+}
+
+/**
+ * Get all songs matching a tag slug.
+ * Resolves the slug back to the original tag name first.
+ */
+export function getSongsByTagSlug(slug: string): { tag: string; songs: Song[] } | null {
+  const allTags = getAllTagsWithSlugs();
+  const match = allTags.find((t) => t.slug === slug);
+  if (!match) return null;
+
+  return {
+    tag: match.tag,
+    songs: getSongsByTag(match.tag),
+  };
 }
