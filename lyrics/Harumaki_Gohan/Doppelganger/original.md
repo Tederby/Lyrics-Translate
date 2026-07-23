@@ -8,7 +8,7 @@ tags: ["harumaki-gohan", "isekaijoucho", "erika-miyazaki", "oneechan-gokko", "an
 title_original: "ドッペルゲンガー"
 title_romaji: "Dopperugengaa"
 album: "ドッペルゲンガー - Single"
-vocalist: "Sui Higure (cv. Isekaijoucho) & Akane Higure (cv. Erika Miyazaki)"
+vocalist: "Isekaijoucho, Akane Higure"
 producer: "Harumaki Gohan"
 lyricist: "Harumaki Gohan"
 arranger: "Harumaki Gohan"
