@@ -176,7 +176,7 @@ function SongCard({ song, index }: { song: Song; index: number }) {
       </div>
 
       {/* Thumbnail */}
-      <div className="relative w-28 shrink-0 sm:w-32">
+      <div className="relative w-28 shrink-0 overflow-hidden sm:w-32">
         {thumbnail ? (
           <>
             <Image
