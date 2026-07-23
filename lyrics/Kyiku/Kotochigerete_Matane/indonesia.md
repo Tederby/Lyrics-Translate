@@ -1,16 +1,3 @@
----
-title: "Hollow Remains"
-title_original: "事切れて、またね。"
-artist: "Kyiku"
-vocalist: "Shiramine Rikka"
-producer: "Kyiku"
-release_date: "2026-07-04"
-translator_note: ""
-tags: ["vocaloid", "kyiku", "shiramine-rikka", "白嶺六花"]
-source_url: "https://www.youtube.com/watch?v=VMrse037aFE"
-translated_date: "2026-07-22"
----
-
 Menyusuri jalan pulang tanpa arah,
 Kutatap hari berlalu bagai kisah orang lain.
 Asa yang samar.

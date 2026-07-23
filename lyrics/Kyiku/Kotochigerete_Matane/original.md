@@ -7,7 +7,7 @@ producer: "Kyiku"
 release_date: "2026-07-04"
 translator_note: ""
 tags: ["vocaloid", "kyiku", "shiramine-rikka", "白嶺六花"]
-source_url: "https://www.youtube.com/watch?v=VMrse037aFE"
+source_url: "https://www.youtube.com/watch?v=c9Yey_N1itg"
 translated_date: "2026-07-22"
 ---
 
