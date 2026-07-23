@@ -112,7 +112,7 @@ function SongCard({ song, index }: { song: Song; index: number }) {
   return (
     <Link
       href={`/${song.slug.join("/")}`}
-      className="song-card group relative flex overflow-hidden rounded-xl border border-zinc-200/80 bg-white transition-all duration-300 hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-200/50 dark:border-zinc-800/80 dark:bg-zinc-900/50 dark:hover:border-zinc-700 dark:hover:shadow-zinc-900/50"
+      className="song-card group relative flex h-40 overflow-hidden rounded-xl border border-zinc-200/80 bg-white transition-all duration-300 hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-200/50 dark:border-zinc-800/80 dark:bg-zinc-900/50 dark:hover:border-zinc-700 dark:hover:shadow-zinc-900/50"
       style={{ animationDelay: `${index * 50}ms` }}
     >
       {/* Text content */}
