@@ -31,8 +31,8 @@ Aku jadi penjahatnya? Tidak, tidak, tidak, tidak, tidak!
 
 Perlahan dirimu mulai mati,
 Syukurlah rasamu murni dusta.
-Tersengat hebat, kepalsuan konyolmu
-yang meleleh, baru wajah aslimu kukenali.
+Tersengat hebat, saat kepalsuan konyolmu-
+meleleh, barulah wajah aslimu kukenali.
 
 *Say Woah*
 Yang kumakan rupanya hanya barang palsu,
@@ -61,8 +61,8 @@ Sejak awal aku membenci segala hal tentangmu.
 
 Perlahan dirimu mulai mati,
 Syukurlah rasamu murni dusta.
-Tersengat hebat, kepalsuan konyolmu
-yang meleleh, baru wajah aslimu kukenali.
+Tersengat hebat, saat kepalsuan konyolmu-
+meleleh, barulah wajah aslimu kukenali.
 
 *Say Woah*
 Yang kumakan rupanya hanya barang palsu,
