@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Search, X } from "lucide-react";
 import type { Song } from "@/lib/types";
 import { getLanguageLabel } from "@/lib/types";
@@ -93,31 +92,11 @@ export default function SongList({ songs, showSearch = true }: SongListProps) {
           </p>
         </div>
       ) : (
-        <motion.div 
-          className="grid gap-4 sm:grid-cols-2"
-          initial="hidden"
-          animate="show"
-          variants={{
-            hidden: {},
-            show: {
-              transition: {
-                staggerChildren: 0.05,
-              },
-            },
-          }}
-        >
+        <div className="grid gap-4 sm:grid-cols-2">
           {filtered.map((song, index) => (
-            <motion.div 
-              key={song.slug.join("/")} 
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } }
-              }}
-            >
-              <SongCard song={song} index={index} />
-            </motion.div>
+            <SongCard key={song.slug.join("/")} song={song} index={index} />
           ))}
-        </motion.div>
+        </div>
       )}
     </div>
   );
@@ -132,6 +111,7 @@ function SongCard({ song, index }: { song: Song; index: number }) {
     <Link
       href={`/${song.slug.join("/")}`}
       className="song-card group relative flex h-48 overflow-hidden rounded-xl border border-zinc-200/80 bg-zinc-900 transition-all duration-300 hover:border-indigo-400/80 hover:shadow-xl hover:shadow-indigo-500/20 dark:border-zinc-800/80 sm:h-56"
+      style={{ animationDelay: `${index * 50}ms` }}
     >
       {/* Background Thumbnail */}
       <div className="absolute inset-0 z-0">
@@ -168,7 +148,7 @@ function SongCard({ song, index }: { song: Song; index: number }) {
       
       {/* Top right date badge */}
       {song.metadata.translated_date && (
-        <div className="absolute right-3 top-3 z-20 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-white/90 backdrop-blur-md">
+        <div className="absolute right-3 top-3 z-20 rounded-md bg-black/60 px-2 py-1 text-[10px] font-medium text-white/90">
           {song.metadata.translated_date}
         </div>
       )}
@@ -211,13 +191,13 @@ function SongCard({ song, index }: { song: Song; index: number }) {
             {song.metadata.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-medium text-zinc-200 backdrop-blur-sm border border-white/5"
+                className="inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-medium text-zinc-100 border border-white/10"
               >
                 {tag}
               </span>
             ))}
             {song.metadata.tags.length > 3 && (
-              <span className="inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-medium text-zinc-400 backdrop-blur-sm border border-white/5">
+              <span className="inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-medium text-zinc-300 border border-white/10">
                 +{song.metadata.tags.length - 3}
               </span>
             )}
@@ -229,7 +209,7 @@ function SongCard({ song, index }: { song: Song; index: number }) {
               <span
                 key={lang}
                 title={getLanguageLabel(lang)}
-                className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded bg-indigo-500/20 px-1.5 text-[10px] font-bold text-indigo-200 backdrop-blur-sm border border-indigo-400/20"
+                className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded bg-indigo-500/40 px-1.5 text-[10px] font-bold text-indigo-100 border border-indigo-400/30"
               >
                 {getLanguageBadge(lang)}
               </span>
