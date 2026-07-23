@@ -3,6 +3,8 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { Search, X } from "lucide-react";
 import type { Song } from "@/lib/types";
 import { getLanguageLabel } from "@/lib/types";
 import { getYouTubeThumbnail } from "@/lib/youtube";
@@ -59,26 +61,23 @@ export default function SongList({ songs, showSearch = true }: SongListProps) {
       {showSearch && (
         <div className="mb-8">
           <div className="relative">
-            <svg
-              className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 dark:text-zinc-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" />
             <input
               type="text"
               placeholder="Search by title, artist, vocalist, lyrics..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-3 pl-11 pr-4 text-sm text-zinc-900 placeholder-zinc-400 transition-all duration-200 focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:border-zinc-600 dark:focus:bg-zinc-900 dark:focus:ring-zinc-800"
+              className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-3 pl-11 pr-10 text-sm text-zinc-900 placeholder-zinc-400 transition-all duration-200 focus:border-indigo-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:border-indigo-600 dark:focus:bg-zinc-900 dark:focus:ring-indigo-900/30"
             />
+            {query && (
+              <button
+                onClick={() => setQuery("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1 text-zinc-400 transition-colors hover:bg-zinc-200 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -94,11 +93,31 @@ export default function SongList({ songs, showSearch = true }: SongListProps) {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <motion.div 
+          className="grid gap-4 sm:grid-cols-2"
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: {},
+            show: {
+              transition: {
+                staggerChildren: 0.05,
+              },
+            },
+          }}
+        >
           {filtered.map((song, index) => (
-            <SongCard key={song.slug.join("/")} song={song} index={index} />
+            <motion.div 
+              key={song.slug.join("/")} 
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } }
+              }}
+            >
+              <SongCard song={song} index={index} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );
@@ -112,94 +131,23 @@ function SongCard({ song, index }: { song: Song; index: number }) {
   return (
     <Link
       href={`/${song.slug.join("/")}`}
-      className="song-card group relative flex h-40 overflow-hidden rounded-xl border border-zinc-200/80 bg-white transition-all duration-300 hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-200/50 dark:border-zinc-800/80 dark:bg-zinc-900/50 dark:hover:border-zinc-700 dark:hover:shadow-zinc-900/50"
-      style={{ animationDelay: `${index * 50}ms` }}
+      className="song-card group relative flex h-48 overflow-hidden rounded-xl border border-zinc-200/80 bg-zinc-900 transition-all duration-300 hover:border-indigo-400/80 hover:shadow-xl hover:shadow-indigo-500/20 dark:border-zinc-800/80 sm:h-56"
     >
-      {/* Text content */}
-      <div className="flex min-w-0 flex-1 flex-col justify-between p-4">
-        <div>
-          {/* Title */}
-          <h2 
-            className="line-clamp-2 font-semibold text-zinc-900 transition-colors group-hover:text-zinc-700 dark:text-zinc-100 dark:group-hover:text-white"
-            title={song.metadata.title}
-          >
-            {song.metadata.title}
-          </h2>
-          {song.metadata.title_original && (
-            <p 
-              className="mt-0.5 truncate text-sm text-zinc-500 dark:text-zinc-400"
-              title={song.metadata.title_original}
-            >
-              {song.metadata.title_original}
-            </p>
-          )}
-
-          {/* Artist / Vocalist */}
-          <p className="mt-1.5 truncate text-sm text-zinc-600 dark:text-zinc-400">
-            {song.metadata.artist}
-            {song.metadata.vocalist &&
-              song.metadata.vocalist !== song.metadata.artist && (
-                <span className="text-zinc-400 dark:text-zinc-500">
-                  {" "}
-                  · {song.metadata.vocalist}
-                </span>
-              )}
-          </p>
-        </div>
-
-        {/* Bottom row: tags + language badges + date */}
-        <div className="mt-3 flex items-end justify-between gap-2">
-          <div className="flex flex-wrap gap-1">
-            {song.metadata.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="inline-block rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
-              >
-                {tag}
-              </span>
-            ))}
-            {song.metadata.tags.length > 3 && (
-              <span className="inline-block rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500">
-                +{song.metadata.tags.length - 3}
-              </span>
-            )}
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {/* Language badges */}
-            <div className="flex gap-0.5">
-              {song.availableLanguages.map((lang) => (
-                <span
-                  key={lang}
-                  title={getLanguageLabel(lang)}
-                  className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded bg-zinc-100 px-1 text-[10px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
-                >
-                  {getLanguageBadge(lang)}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Thumbnail */}
-      <div className="relative w-28 shrink-0 overflow-hidden sm:w-32">
+      {/* Background Thumbnail */}
+      <div className="absolute inset-0 z-0">
         {thumbnail ? (
-          <>
-            <Image
-              src={thumbnail}
-              alt={song.metadata.title}
-              fill
-              sizes="(max-width: 640px) 112px, 128px"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              unoptimized
-            />
-            {/* Fade overlay from left */}
-            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/60 to-transparent dark:from-zinc-900/90 dark:via-zinc-900/40 dark:to-transparent" />
-          </>
+          <Image
+            src={thumbnail}
+            alt={song.metadata.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-110 group-hover:brightness-110"
+            unoptimized
+          />
         ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+          <div className="flex h-full items-center justify-center bg-zinc-800">
             <svg
-              className="h-8 w-8 text-zinc-300 dark:text-zinc-700"
+              className="h-12 w-12 text-zinc-700"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -213,13 +161,81 @@ function SongCard({ song, index }: { song: Song; index: number }) {
             </svg>
           </div>
         )}
+      </div>
 
-        {/* Date badge on thumbnail */}
-        {song.metadata.translated_date && (
-          <span className="absolute bottom-1.5 right-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur-sm">
-            {song.metadata.translated_date}
-          </span>
-        )}
+      {/* Gradient Overlay for Text Readability */}
+      <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/95 via-black/60 to-black/10 opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
+      
+      {/* Top right date badge */}
+      {song.metadata.translated_date && (
+        <div className="absolute right-3 top-3 z-20 rounded-md bg-black/50 px-2 py-1 text-[10px] font-medium text-white/90 backdrop-blur-md">
+          {song.metadata.translated_date}
+        </div>
+      )}
+
+      {/* Text Content (Foreground) */}
+      <div className="relative z-20 flex h-full w-full flex-col justify-end p-4 sm:p-5">
+        <div className="min-w-0">
+          {/* Title */}
+          <h2 
+            className="line-clamp-2 text-lg font-bold tracking-tight text-white drop-shadow-sm transition-colors group-hover:text-indigo-100"
+            title={song.metadata.title}
+          >
+            {song.metadata.title}
+          </h2>
+          {song.metadata.title_original && (
+            <p 
+              className="mt-0.5 truncate text-sm text-zinc-300 drop-shadow-sm"
+              title={song.metadata.title_original}
+            >
+              {song.metadata.title_original}
+            </p>
+          )}
+
+          {/* Artist / Vocalist */}
+          <p className="mt-1.5 truncate text-sm font-medium text-zinc-400 drop-shadow-sm">
+            {song.metadata.artist}
+            {song.metadata.vocalist &&
+              song.metadata.vocalist !== song.metadata.artist && (
+                <span className="text-zinc-500">
+                  {" "}
+                  · {song.metadata.vocalist}
+                </span>
+              )}
+          </p>
+        </div>
+
+        {/* Bottom row: tags + language badges */}
+        <div className="mt-4 flex items-end justify-between gap-2">
+          <div className="flex flex-wrap gap-1.5">
+            {song.metadata.tags.slice(0, 3).map((tag) => (
+              <span
+                key={tag}
+                className="inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-medium text-zinc-200 backdrop-blur-sm border border-white/5"
+              >
+                {tag}
+              </span>
+            ))}
+            {song.metadata.tags.length > 3 && (
+              <span className="inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-medium text-zinc-400 backdrop-blur-sm border border-white/5">
+                +{song.metadata.tags.length - 3}
+              </span>
+            )}
+          </div>
+          
+          <div className="flex shrink-0 items-center gap-1">
+            {/* Language badges */}
+            {song.availableLanguages.map((lang) => (
+              <span
+                key={lang}
+                title={getLanguageLabel(lang)}
+                className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded bg-indigo-500/20 px-1.5 text-[10px] font-bold text-indigo-200 backdrop-blur-sm border border-indigo-400/20"
+              >
+                {getLanguageBadge(lang)}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </Link>
   );

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
@@ -144,7 +146,7 @@ export default function SongDetail({ song }: SongDetailProps) {
       )}
 
       {/* Language controls */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div className="sticky top-[3.5rem] z-30 -mx-4 mb-6 flex flex-wrap items-center gap-3 border-b border-zinc-200/80 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/80 sm:mx-0 sm:rounded-xl sm:border">
         {/* Language dropdown selector */}
         <div className="flex items-center gap-2">
           <label
@@ -200,25 +202,35 @@ export default function SongDetail({ song }: SongDetailProps) {
       </div>
 
       {/* Lyrics content */}
-      {sideBySide ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          <LyricsPane
-            label={getLanguageLabel(activeLanguage)}
-            content={song.languages[activeLanguage]?.content ?? ""}
-            expanded
-          />
-          <LyricsPane
-            label={getLanguageLabel(secondLanguage)}
-            content={song.languages[secondLanguage]?.content ?? ""}
-            expanded
-          />
-        </div>
-      ) : (
-        <LyricsPane
-          label={getLanguageLabel(activeLanguage)}
-          content={song.languages[activeLanguage]?.content ?? ""}
-        />
-      )}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={sideBySide ? `dual-${activeLanguage}-${secondLanguage}` : `single-${activeLanguage}`}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+        >
+          {sideBySide ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              <LyricsPane
+                label={getLanguageLabel(activeLanguage)}
+                content={song.languages[activeLanguage]?.content ?? ""}
+                expanded
+              />
+              <LyricsPane
+                label={getLanguageLabel(secondLanguage)}
+                content={song.languages[secondLanguage]?.content ?? ""}
+                expanded
+              />
+            </div>
+          ) : (
+            <LyricsPane
+              label={getLanguageLabel(activeLanguage)}
+              content={song.languages[activeLanguage]?.content ?? ""}
+            />
+          )}
+        </motion.div>
+      </AnimatePresence>
 
       {/* Keyboard shortcuts hint */}
       <p className="mt-4 text-xs text-zinc-400 dark:text-zinc-600">
@@ -280,16 +292,12 @@ function LyricsPane({
         >
           {copied ? (
             <>
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
+              <Check className="h-3.5 w-3.5" />
               Copied!
             </>
           ) : (
             <>
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
+              <Copy className="h-3.5 w-3.5" />
               Copy
             </>
           )}
