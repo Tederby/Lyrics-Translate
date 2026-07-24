@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, X } from "lucide-react";
+import { Search, X, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Song } from "@/lib/types";
 import { getLanguageLabel } from "@/lib/types";
 import { getYouTubeThumbnail } from "@/lib/youtube";
@@ -40,6 +40,9 @@ interface SongListProps {
 
 export default function SongList({ songs, showSearch = true }: SongListProps) {
   const [query, setQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 20;
 
   const filtered = useMemo(() => {
     const raw = query.trim();
@@ -54,6 +57,17 @@ export default function SongList({ songs, showSearch = true }: SongListProps) {
       return tokens.every((token) => haystack.includes(token));
     });
   }, [songs, query]);
+
+  // Reset page when search query changes
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [query]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const paginated = filtered.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div>
@@ -92,10 +106,66 @@ export default function SongList({ songs, showSearch = true }: SongListProps) {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {filtered.map((song, index) => (
-            <SongCard key={song.slug.join("/")} song={song} index={index} />
-          ))}
+        <div className="space-y-8">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {paginated.map((song, index) => (
+              <SongCard key={song.slug.join("/")} song={song} index={index} />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-4">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 transition-colors hover:bg-zinc-50 disabled:pointer-events-none disabled:opacity-50 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
+                aria-label="Previous page"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                  // Simple pagination logic: show first, last, current, and +/- 1 from current
+                  if (
+                    pageNum === 1 ||
+                    pageNum === totalPages ||
+                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-lg border px-2 text-sm font-medium transition-colors ${
+                          currentPage === pageNum
+                            ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-indigo-500/50 dark:bg-indigo-500/10 dark:text-indigo-300"
+                            : "border-transparent text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  }
+                  
+                  // Show ellipsis
+                  if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                    return <span key={pageNum} className="px-1 text-zinc-400">...</span>;
+                  }
+                  
+                  return null;
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 transition-colors hover:bg-zinc-50 disabled:pointer-events-none disabled:opacity-50 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
+                aria-label="Next page"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -110,8 +180,7 @@ function SongCard({ song, index }: { song: Song; index: number }) {
   return (
     <Link
       href={`/${song.slug.join("/")}`}
-      className="song-card group relative flex h-48 overflow-hidden rounded-xl border border-zinc-200/80 bg-zinc-900 transition-all duration-300 hover:border-indigo-400/80 hover:shadow-xl hover:shadow-indigo-500/20 dark:border-zinc-800/80 sm:h-56"
-      style={{ animationDelay: `${index * 50}ms` }}
+      className="group relative flex h-48 overflow-hidden rounded-xl border border-zinc-200/80 bg-zinc-900 transition-all duration-300 hover:-translate-y-1 hover:border-indigo-400/80 hover:shadow-xl hover:shadow-indigo-500/20 dark:border-zinc-800/80 sm:h-56"
     >
       {/* Background Thumbnail */}
       <div className="absolute inset-0 z-0">
